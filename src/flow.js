@@ -1,7 +1,10 @@
+
+export function initializeFlow(){
 const $=id=>document.getElementById(id),body=document.body;
 const theme=document.querySelector('meta[name=theme-color]');
-let timer=null;
+let timer=null,transitionTimer=null;
 function show(s){body.dataset.screen=s;theme.content=(s==='start'||s==='preend'||s==='ending')?'#EAFDFF':'#E5F8FA'}
+show('start');
 function setDigit(n){
   document.querySelectorAll('.digit').forEach(d=>d.classList.toggle('on',+d.dataset.n===n));
   $('live').textContent=n;
@@ -15,8 +18,10 @@ function startCountdown(){
   },1000);
 }
 function back(){clearInterval(timer);clearTimeout(bt);clearInterval(dt);stopMove();show('start')}
-const press=(el,fn)=>{el.addEventListener('click',fn);
-  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}})};
+const disposers=[];
+const listen=(target,event,handler)=>{target.addEventListener(event,handler);disposers.push(()=>target.removeEventListener(event,handler))};
+const press=(el,fn)=>{listen(el,'click',fn);
+  listen(el,'keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}})};
 press($('start'),startCountdown);
 document.querySelectorAll('.back').forEach(b=>press(b,back));
 
@@ -52,7 +57,7 @@ function startBreathing(){
   const z=$('b-zoom');z.style.willChange='auto';z.style.transition='none';z.style.transform=`scale(${1/BIG})`;z.getBoundingClientRect();
   cycle(1);
 }
-document.addEventListener('mooca:countdown-done',startBreathing);
+listen(document,'mooca:countdown-done',startBreathing);
 
 const MD={
  su:{n:4,dur:4000,t:'translateY(-26px)',tr:'4000ms cubic-bezier(.25,.6,.35,1)',msg:'สูดหายใจเข้าลึก ๆ ยกไหล่ขึ้นช้า ๆ'},
@@ -100,11 +105,14 @@ function startMove(){
   const s=$('mslot');s.style.transition='none';s.style.transform='none';s.getBoundingClientRect();
   mRun(0);
 }
-document.addEventListener('mooca:breathing-done',()=>setTimeout(startMove,400));
+listen(document,'mooca:breathing-done',()=>{clearTimeout(transitionTimer);transitionTimer=setTimeout(startMove,400)});
 
 function startFocus(){stopMove();show('focus')}
-document.addEventListener('mooca:move-done',()=>setTimeout(startFocus,400));
+listen(document,'mooca:move-done',()=>{clearTimeout(transitionTimer);transitionTimer=setTimeout(startFocus,400)});
 press($('focus-cta'),()=>show('preend'));
 press($('preend-cta'),()=>show('ending'));
 press($('preend-secondary'),startCountdown);
 press($('ending-cta'),back);
+
+return ()=>{disposers.forEach(dispose=>dispose());clearInterval(timer);clearTimeout(bt);clearTimeout(transitionTimer);clearInterval(dt);stopMove()};
+}

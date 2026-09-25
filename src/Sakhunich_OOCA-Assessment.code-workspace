@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../../../Documents/GitHub/Sakhunich_OOCA-Assessment"
+		},
+		{
+			"path": "../dist"
+		},
+		{
+			"path": "../node_modules"
+		},
+		{
+			"path": "../public"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}

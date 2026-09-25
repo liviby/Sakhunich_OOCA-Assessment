@@ -1,3 +1,4 @@
+
 :root{color-scheme:light}
 html,body{height:100%;margin:0;overflow:hidden;background:#EAFDFF}
 body[data-screen=count],body[data-screen=breathe],body[data-screen=move],body[data-screen=focus]{background:#E5F8FA}
